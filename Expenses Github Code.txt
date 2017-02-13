@@ -1,0 +1,171 @@
+Option Explicit
+
+Private Sub CmdCancel_Click()
+Unload Me
+
+End Sub
+
+Private Sub CmdSave_Click()
+Dim TypeData As Variant
+Dim TabForType As String
+Dim mysheet As Worksheet
+Dim Sheet As Worksheet
+
+Application.ScreenUpdating = False
+
+Worksheets("All").Activate
+
+If Range("A2").Value = "" Then
+    Range("A2").Activate
+    ActiveCell.Value = TxtDate.Value
+    ActiveCell.Offset(0, 1).Value = CmbPaymentMethod.Value
+    ActiveCell.Offset(0, 2).Value = CmbType.Value
+    ActiveCell.Offset(0, 3).Value = TxtDescription.Value
+    If CmbPaymentMethod.Value = "Debit" Then
+        ActiveCell.Offset(0, 4).Value = TxtAmount.Value
+    ElseIf CmbPaymentMethod.Value = "Credit" Then
+        ActiveCell.Offset(0, 5).Value = TxtAmount.Value
+    Else
+        ActiveCell.Offset(0, 6).Value = TxtAmount.Value
+    End If
+Else
+Range("A1").End(xlDown).Offset(1, 0).Select
+ActiveCell.Value = TxtDate.Value
+ActiveCell.Offset(0, 1).Value = CmbPaymentMethod.Value
+ActiveCell.Offset(0, 2).Value = CmbType.Value
+ActiveCell.Offset(0, 3).Value = TxtDescription.Value
+    If CmbPaymentMethod.Value = "Debit" Then
+        ActiveCell.Offset(0, 4).Value = TxtAmount.Value
+    ElseIf CmbPaymentMethod.Value = "Credit" Then
+        ActiveCell.Offset(0, 5).Value = TxtAmount.Value
+    Else
+        ActiveCell.Offset(0, 6).Value = TxtAmount.Value
+    End If
+End If
+
+Unload Me
+
+TypeData = CmbType.Value
+    If TypeData = "Groceries" Then
+        TabForType = "Groceries"
+    ElseIf TypeData = "Miscellaneous Expenses" Then
+        TabForType = "Miscellaneous Expenses"
+    ElseIf TypeData = "Transportation" Then
+        TabForType = "Transportation"
+    ElseIf TypeData = "Apartment Stuff" Then
+        TabForType = "Apartment Stuff"
+    ElseIf TypeData = "Guggenheim Lunch" Then
+        TabForType = "Guggenheim Lunch"
+    ElseIf TypeData = "Rent" Then
+        TabForType = "Rent"
+    ElseIf TypeData = "Clothes" Then
+        TabForType = "Clothes"
+    ElseIf TypeData = "Cable" Then
+        TabForType = "Cable"
+    ElseIf TypeData = "Insurance" Then
+        TabForType = "Insurance"
+    ElseIf TypeData = "Credit Card Payment" Then
+        TabForType = "Credit Card Payment"
+    ElseIf TypeData = "Paycheck" Then
+        TabForType = "Paycheck"
+    ElseIf TypeData = "Miscellaneous Deposits" Then
+        TabForType = "Miscellaneous Deposits"
+    ElseIf TypeData = "Gym" Then
+        TabForType = "Gym"
+    ElseIf TypeData = "Bar, Restaurant & Entertainment" Then
+        TabForType = "Bar, Restaurant & Entertainment"
+    End If
+    
+ActiveCell.End(xlToLeft).Activate
+ActiveCell.EntireRow.Copy
+Worksheets(TabForType).Activate
+        
+If Range("A2") = "" Then
+    Range("A2").PasteSpecial
+    ActiveCell.Offset(1, 0).Activate
+Else
+    Range("A1").End(xlDown).Offset(1, 0).Activate
+    ActiveCell.PasteSpecial
+End If
+   
+Set mysheet = ActiveSheet
+    For Each Sheet In Worksheets
+        Sheet.Select
+        Cells.EntireColumn.AutoFit
+    Next Sheet
+    mysheet.Select
+    
+Worksheets("UserForm").Activate
+Worksheets("UserForm").Range("A1").Select
+      
+Application.ScreenUpdating = True
+
+End Sub
+
+Private Sub FrmExpenses_Click()
+
+End Sub
+
+Private Sub CmdPivotTableUpdate_Click()
+
+Dim PivTab As PivotTable
+Dim PivTabCache As PivotCache
+Dim Data As Variant
+
+Set PivTabCache = ActiveWorkbook.PivotCaches.Create(xlDatabase, Worksheets("All").UsedRange)
+
+Worksheets("Pivot Table").Activate
+    If Range("A1").Value <> "" Or Range("A2").Value <> "" Or Range("B1").Value <> "" Or Range("B3").Value <> "" Then
+        Set Data = ActiveSheet.UsedRange
+        Data.Delete
+    End If
+
+Set PivTab = Worksheets("Pivot Table").PivotTables.Add(PivotCache:=PivTabCache, Tabledestination:=Range("A1"))
+    With PivTab
+        .PivotFields("Payment Method").Orientation = xlRowField
+        .PivotFields("Type").Orientation = xlDataField
+        .DisplayFieldCaptions = True
+    End With
+
+Unload Me
+
+
+End Sub
+
+Private Sub TxtAmount_AfterUpdate()
+Dim TxtBoxOld As String
+
+If IsNumeric(TxtAmount) Then
+    TxtAmount = Format(TxtAmount, "$#,##0.00;-$#,##0.00")
+Else
+    TxtAmount = TxtBoxOld
+End If
+    
+End Sub
+
+Private Sub TxtAmount_BeforeUpdate(ByVal Cancel As MSForms.ReturnBoolean)
+    Dim TxtBoxOld As String
+If IsNumeric(TxtAmount) Then
+    TxtBoxOld = Format(TxtAmount, "$#,##0.00")
+End If
+
+End Sub
+
+Private Sub TxtDate_KeyUp(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)
+
+Dim TxtD As String
+TxtD = TxtDate.Text
+
+If KeyCode <> 8 Then
+    If (Len(TxtD) = 2 Or Len(TxtD) = 5) Then
+        TxtD = TxtD & "-"
+    End If
+    
+End If
+TxtDate.Text = TxtD
+
+End Sub
+
+Private Sub UserForm_Click()
+
+End Sub
